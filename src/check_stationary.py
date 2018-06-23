@@ -1,9 +1,10 @@
+import numpy as np
 import pandas as pd
 from statsmodels.tsa.seasonal import seasonal_decompose
 from statsmodels.tsa.stattools import adfuller
 
 
-def ADF_test(df, row_name):
+def ADF_test(df, row_name=None):
     if df[row_name].isnull().any():
         df_test = adfuller(df[row_name].dropna(), autolag='AIC')
     else:
@@ -24,11 +25,18 @@ if __name__ == '__main__':
     # ADF検定（帰無仮説は「単位根が存在する」、対立仮説が「定常である」）
     # サンプルデータでは帰無仮説を棄却できない
     df_output = ADF_test(df, 'Passengers')
-    print(df_output)
+    # print(df_output)
 
     # 差分系列に対してADF検定を行う(帰無仮説を棄却できれば、データ系列は単位根過程）
     diff_df = pd.DataFrame(index=df.index, columns=df.columns)
     diff_df['Passengers'] = df['Passengers'] - df['Passengers'].shift(1)
     diff_df = diff_df.dropna()
     df_output = ADF_test(diff_df, 'Passengers')
+    # print(df_output)
+
+    # ホワイトノイズを生成
+    # 生成したホワイトノイズに対してADF検定を行う
+    # ホワイトノイズは定常過程の代表例
+    samples = pd.DataFrame(np.random.normal(0, 1, 1000), columns=['values'])
+    df_output = ADF_test(samples, 'values')
     print(df_output)
